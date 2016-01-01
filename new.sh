@@ -5,4 +5,4 @@ if [ ${#1} = 0 ]; then
     exit 1
 fi
 
-rails new $1 -JO --skip-bundle -m "${SELF_DIR}/rails-akiroom-template.rb"
+rails new $1 -O --skip-bundle -m "${SELF_DIR}/rails-akiroom-template.rb"
