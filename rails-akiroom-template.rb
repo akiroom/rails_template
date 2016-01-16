@@ -1,4 +1,28 @@
 
+def file_replace(path, before, after)
+  File.write(path, File.open(path, &:read).gsub(before, after))
+end
+
+def route_replace(before, after)
+  inside('config') do
+    file_replace(
+        'routes.rb',
+        before.is_a?(Regexp) ? before : /^(\s*)#{Regexp.escape(before)}$/,
+        before.is_a?(Regexp) ? after : "\\1#{after}"
+    )
+  end
+end
+
+def route_remove(target)
+  inside('config') do
+    file_replace(
+        'routes.rb',
+        target.is_a?(Regexp) ? target : /^(\s*)#{Regexp.escape(target)}\n/,
+        ''
+    )
+  end
+end
+
 includesUserLogin = yes?("Include user login?")
 
 # MongoDB
@@ -17,6 +41,7 @@ if includesUserLogin
     environment "config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }", env: 'development'
     generate 'devise User'
     generate 'devise:views'
+    route_replace 'devise_for :users', "devise_for :users, path: '', path_names: {sign_in: 'login', sign_out: 'logout'}"
   end
 end
 
@@ -38,6 +63,7 @@ run 'bundle install'
 after_bundle do
   generate 'controller Home index'
   route "root to: 'home#index'"
+  route_remove "get 'home/index'"
 end
 
 # Edit some files
